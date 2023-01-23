@@ -27,6 +27,17 @@ let server = http.createServer(function(req, res){
             find(res, "voti", {},{});
         break;
 
+        case "/q3":
+            find(res, "voti", {codP:4},{voto:1});
+        break;
+
+        case "/q4":
+            remove(res, "persone", {});
+        break;
+
+        case "/q5":
+            break;
+
         case "/i1":
             insertMany(res, "persone", 
             [
@@ -76,6 +87,22 @@ function creaConnessione(nomeDb, response, callback){
     promise.catch(function(err){
         json = {cod:-1, desc:"Errore nella connessione"};
         response.end(JSON.stringify(json));
+    });
+}
+
+function find2(res, col, obj, select, callback){
+    creaConnessione(database, res, function(conn, db){
+        let promise = db.collection(col).find(obj).project(select).toArray();
+        promise.then(function(ris){
+            conn.close();
+            callback(ris);
+        });
+
+        promise.catch(function(error){
+            obj = { cod:-2, desc:"Errore nella ricerca"}
+            res.end(JSON.stringify(obj));
+            conn.close();
+        });
     });
 }
 
@@ -195,6 +222,22 @@ function insertMany(res, col, array){
         });
         promise.catch(function(err){
             obj = { cod:-2, desc:"Errore nell'inserimento"}
+            res.end(JSON.stringify(obj));
+            conn.close();
+        });
+    });
+}
+
+function remove(res, col, where){
+    creaConnessione(database, res, function(conn, db){
+        let promise = db.collection(col).deleteMany(where); 
+        promise.then(function(ris){
+            json = { cod:1, desc:"Remove in esecuzione", ris };
+            res.end(JSON.stringify(json));
+            conn.close();
+        });
+        promise.catch(function(err){
+            obj = { cod:-2, desc:"Errore nella cancellazione"}
             res.end(JSON.stringify(obj));
             conn.close();
         });
