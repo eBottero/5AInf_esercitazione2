@@ -19,8 +19,45 @@ let server = http.createServer(function(req, res){
     //Decodifico la richiesta ed eseguo la query interessata
     let scelta = (url.parse(req.url)).pathname;
     switch(scelta){
-        
+        case "/q1":
+            find(res, "persone", {nome:/^L/},{});
+            break;
 
+        case "/q2":
+            find(res, "voti", {},{});
+        break;
+
+        case "/i1":
+            insertMany(res, "persone", 
+            [
+                {_id:"1", nome:"Francesca"},
+                {_id:"2", nome:"Leonardo"},
+                {_id:"3", nome:"Jessica"},
+                {_id:"4", nome:"Leopoldo"},
+                {_id:"5", nome:"Giancarlo"},
+                {_id:"6", nome:"Renata"},
+                {_id:"7", nome:"Giuseppe"}
+            ]
+            ,{});
+            break;
+
+        case "/i2":
+            insertMany(res, "voti", 
+            [
+                { codP:1, voto:10},
+                { codP:2, voto:7},
+                { codP:3, voto:3},
+                { codP:4, voto:4},
+                { codP:4, voto:3},
+                { codP:5, voto:5},
+                { codP:6, voto:6},
+                { codP:7, voto:7},
+                { codP:7, voto:4},
+                { codP:7, voto:5}
+            ]
+            ,{});
+            break;
+        
         default:
             json = {cod:-1, desc:"Nessuna query trovata con quel nome"};
             res.end(JSON.stringify(json));
@@ -42,9 +79,9 @@ function creaConnessione(nomeDb, response, callback){
     });
 }
 
-function find(res, obj, select){
+function find(res, col, obj, select){
     creaConnessione(database, res, function(conn, db){
-        let promise = db.collection(autore).find(obj).project(select).toArray();
+        let promise = db.collection(col).find(obj).project(select).toArray();
         promise.then(function(ris){
             //console.log(ris);
             obj = { cod:0, desc:"Dati trovati con successo", ris};
@@ -60,9 +97,9 @@ function find(res, obj, select){
     });
 }
 
-function limit(res, obj, select, n){
+function limit(res, col, obj, select, n){
     creaConnessione(database, res, function(conn, db){
-        let promise = db.collection(autore).find(obj).project(select).limit(n).toArray();
+        let promise = db.collection(col).find(obj).project(select).limit(n).toArray();
         promise.then(function(ris){
             //console.log(ris);
             obj = { cod:0, desc:"Dati trovati con successo", ris};
@@ -78,9 +115,9 @@ function limit(res, obj, select, n){
     });
 }
 
-function sort(res, obj, select, orderby){
+function sort(res, col, obj, select, orderby){
     creaConnessione(database, res, function(conn, db){
-        let promise = db.collection(autore).find(obj).project(select).sort(orderby).toArray();
+        let promise = db.collection(col).find(obj).project(select).sort(orderby).toArray();
         promise.then(function(ris){
             //console.log(ris);
             obj = { cod:0, desc:"Dati trovati con successo", ris};
@@ -96,9 +133,9 @@ function sort(res, obj, select, orderby){
     });
 }
 
-function cont(res, query){
+function cont(res, col, query){
     creaConnessione(database, res, function(conn, db){
-        let promise = db.collection(autore).countDocuments(query);
+        let promise = db.collection(col).countDocuments(query);
         promise.then(function(ris){
             //console.log(ris);
             obj = { cod:0, desc:"Dati trovati con successo", ris};
@@ -114,9 +151,9 @@ function cont(res, query){
     });
 }
 
-function cont2(res, query){
+function cont2(res, col, query){
     creaConnessione(database, res, function(conn, db){
-        let promise = db.collection(autore).count(query);
+        let promise = db.collection(col).count(query);
         promise.then(function(ris){
             //console.log(ris);
             obj = { cod:0, desc:"Dati trovati con successo", ris};
@@ -132,9 +169,9 @@ function cont2(res, query){
     });
 }
 
-function insertOne(res, obj){
+function insertOne(res, col, obj){
     creaConnessione(database, res, function(conn, db){
-        let promise = db.collection(autore).insertOne(obj); 
+        let promise = db.collection(col).insertOne(obj); 
         promise.then(function(ris){
             json = { cod:1, desc:"Insert in esecuzione", ris };
             res.end(JSON.stringify(json));
@@ -148,9 +185,9 @@ function insertOne(res, obj){
     });
 }
 
-function insertMany(res, array){
+function insertMany(res, col, array){
     creaConnessione(database, res, function(conn, db){
-        let promise = db.collection(autore).insertMany(array); 
+        let promise = db.collection(col).insertMany(array); 
         promise.then(function(ris){
             json = { cod:1, desc:"Insert in esecuzione", ris };
             res.end(JSON.stringify(json));
