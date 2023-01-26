@@ -35,7 +35,20 @@ let server = http.createServer(function(req, res){
             remove(res, "persone", {});
         break;
 
+        //Dato il nome di una persona ritornare i suoi voti
         case "/q5":
+            find2(res, "persone", {nome:"Leopoldo"}, {_id:1}, function(ris){
+                //res.end(JSON.stringify(ris));
+                //Prendere il codice
+                console.log(ris); //ARRAY
+                let id = ris[0]._id; 
+                console.log(id);
+                console.log({codP:id});
+
+                //Effettuare la seconda query
+                //RICORDARSI CHE è PUNTIGLIOSO SUI TIPI
+                find(res, "voti", {codP:parseInt(id)}, {});
+            });
             break;
 
         case "/i1":
