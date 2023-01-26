@@ -11,7 +11,7 @@ let url = require("url");
 let database = "5AInf_2";
 
 //DEFINISCO IL SERVER
-let json;
+let json, op;
 let server = http.createServer(function(req, res){
     //Avverto il browser che ritorno un oggetto JSON
     res.setHeader('Content-Type', 'application/json');
@@ -62,6 +62,32 @@ let server = http.createServer(function(req, res){
                     res.end(JSON.stringify(ris));
                 });
             });
+            break;
+
+        case "/q6":
+            /* L'ordine delle funzione è fondamentale */
+            op = [
+                {$match:{nome:/o$/}}, //FIND / WHERE
+                {$project:{_id:0}},//SELECT
+                {$limit:2},  
+                {$sort:{nome:1}}, //Se metto sort prima di limit ci sarebbe Giancarlo come primo
+                /*
+                    group:{ indico tutti gli attributi 
+                        che verranno calcolati e 
+                        visualizzati}
+                */
+                {$group:{_id:{}, contPersone:{$sum:1}}},
+                {$project:{_id:0}}
+            ];
+            aggregate(res, "persone", op);
+            break;
+
+        case "/q7":
+            /* L'ordine delle funzione è fondamentale */
+            op = [
+                {$group:{_id:{persona:"$codP"}, contVoti:{$sum:1}}}
+            ];
+            aggregate(res, "voti", op);
             break;
 
         case "/i1":
@@ -135,6 +161,31 @@ function find2(res, col, obj, select, callback){
 function find(res, col, obj, select){
     creaConnessione(database, res, function(conn, db){
         let promise = db.collection(col).find(obj).project(select).toArray();
+        promise.then(function(ris){
+            //console.log(ris);
+            obj = { cod:0, desc:"Dati trovati con successo", ris};
+            res.end(JSON.stringify(obj));
+            conn.close();
+        });
+
+        promise.catch(function(error){
+            obj = { cod:-2, desc:"Errore nella ricerca"}
+            res.end(JSON.stringify(obj));
+            conn.close();
+        });
+    });
+}
+
+/*
+    aggregate -> aggregazione di funzioni di ricerca
+
+    opzioni -> array di oggetti dove ogni oggetto è un 
+            filtro che vogliamo applicare alla collezione
+
+*/
+function aggregate(res, col, opzioni){
+    creaConnessione(database, res, function(conn, db){
+        let promise = db.collection(col).aggregate(opzioni).toArray();
         promise.then(function(ris){
             //console.log(ris);
             obj = { cod:0, desc:"Dati trovati con successo", ris};
