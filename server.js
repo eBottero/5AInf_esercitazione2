@@ -37,7 +37,8 @@ let server = http.createServer(function(req, res){
 
         //Dato il nome di una persona ritornare i suoi voti
         case "/q5":
-            find2(res, "persone", {nome:"Leopoldo"}, {_id:1}, function(ris){
+            let persona = "Leopoldo";
+            find2(res, "persone", {nome:persona}, {_id:1}, function(ris){
                 //res.end(JSON.stringify(ris));
                 //Prendere il codice
                 console.log(ris); //ARRAY
@@ -47,7 +48,19 @@ let server = http.createServer(function(req, res){
 
                 //Effettuare la seconda query
                 //RICORDARSI CHE è PUNTIGLIOSO SUI TIPI
-                find(res, "voti", {codP:parseInt(id)}, {});
+                find2(res, "voti", {codP:parseInt(id)}, {codP:0}, function(ris){
+                    /*for(let i in ris){
+                        ris[i].persona = persona;
+                    }*/
+                    /*for(let item of ris){
+                        item.persona = persona;
+                    }*/
+                    ris.forEach(element => {
+                        element.persona = persona;
+                    });
+
+                    res.end(JSON.stringify(ris));
+                });
             });
             break;
 
